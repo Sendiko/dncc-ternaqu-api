@@ -20,6 +20,7 @@ class CreateProductsTable extends Migration
             $table->string('benefits');
             $table->string('brand');
             $table->bigInteger('store_id');
+            $table->string('product_id');
             $table->timestamps();
         });
     }

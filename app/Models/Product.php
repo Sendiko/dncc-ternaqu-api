@@ -14,5 +14,6 @@ class Product extends Model
         'benefits',
         'brand',
         'store_id',
+        'product_id',
     ];
 }
