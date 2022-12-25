@@ -19,6 +19,7 @@ class CreateProductsTable extends Migration
             $table->string('description');
             $table->string('benefits');
             $table->string('brand');
+            $table->integer('price');
             $table->bigInteger('store_id');
             $table->string('product_id');
             $table->timestamps();
