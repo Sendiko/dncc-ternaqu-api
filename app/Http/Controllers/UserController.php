@@ -2,62 +2,72 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
+    public function register(Request $request){
+        
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|string|min:8|confirmed'
+        ]);
+
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => $data['password']
+        ]);
+
+        $token = $user->createToken('auth_token')->plainText;
+        return response()->json([
+            'status' => 201,
+            'message' => "$user->name berhasil register",
+            'data' => $user,
+            'token' => $token,
+            'token_type' => 'Bearer'
+        ], 201);
+
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
+    public function login(Request $request){
+
+        $data = $request->validator([
+            'email' => 'required|string|email',
+            'password' => 'required|string|min:8'
+        ]);
+
+        $user = User::where('email', $data['email'])->firstOrFail();
+        if(!$user || !Hash::check($data['password'], $user->password)){
+            return response()->json([
+                'status' => 401,
+                'message' => "$user->name gagal login, mohon cek kembali data",
+                'token' => 'null',
+                'token_type' => 'null'
+            ], 401);
+        } else {
+            $token = $user->createToken('auth_token')->plainTextToken;
+            return response()->json([
+                'status' => 200, 
+                'message' => "$user->name berhasil login",
+                'token' => $token,
+                'token_type' => 'Bearer',
+            ], 200);
+        }
+
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
+    public function logout(){
+        auth('sanctum')->user()->tokens()->delete();
+        return response()->json([
+            'status' => 200,
+            'message' => 'berhasil logout',
+            'token' => 'null',
+            'token_type' => 'null'
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
 }
