@@ -11,18 +11,18 @@ class AdminController extends Controller
     public function register(Request $request){
         
         $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
+            'name' => 'required|string|max:255|unique:admins',
+            'email' => 'required|email|unique:admins',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
         $admin = Admin::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => $data['password'],
+            'password' => Hash::make($data['password']),
         ]);
 
-        $token = $admin->createToken('auth_token')->plainText;
+        $token = $admin->createToken('auth_token')->plainTextToken;
         return response()->json([
             'status' => 201,
             'message' => "$admin->name berhasil register",
@@ -35,7 +35,7 @@ class AdminController extends Controller
 
     public function login(Request $request){
 
-        $data = $request->validator([
+        $data = $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string|min:8'
         ]);
