@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -21,9 +22,15 @@ use Illuminate\Support\Facades\URL;
 Route::post('register', [UserController::class, 'register']);
 Route::post('login', [UserController::class, 'login']);
 
+Route::get('recipe', [RecipeController::class, 'index']);
+Route::get('recipe/{id}', [RecipeController::class, 'show']);
+
 //!! PRIVATE ROUTE
 Route::middleware('auth:sanctum')->group(function(){
     Route::post('logout', [UserController::class, 'logout']);
+    Route::resource('recipe', RecipeController::class)->except([
+        'index', 'show'
+    ]);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
