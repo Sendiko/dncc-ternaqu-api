@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,13 +21,9 @@ use Illuminate\Support\Facades\Route;
 Route::post('register', [UserController::class, 'register']);
 Route::post('login', [UserController::class, 'login']);
 
-Route::post('admin/register', [AdminController::class, 'register']);
-Route::post('admin/login', [AdminController::class, 'login']);
-
 //!! PRIVATE ROUTE
 Route::middleware('auth:sanctum')->group(function(){
     Route::post('logout', [UserController::class, 'logout']);
-    Route::post('admin/logout', [AdminController::class, 'logout']);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
