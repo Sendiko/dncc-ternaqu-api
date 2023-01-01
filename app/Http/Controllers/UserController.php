@@ -13,20 +13,20 @@ class UserController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
-            'password' => 'required|string|min:8|confirmed'
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => $data['password']
+            'password' => Hash::make($data['password']),
         ]);
 
-        $token = $user->createToken('auth_token')->plainText;
+        $token = $user->createToken('auth_token')->plainTextToken;
         return response()->json([
             'status' => 201,
             'message' => "$user->name berhasil register",
-            'data' => $user,
+            'user' => $user,
             'token' => $token,
             'token_type' => 'Bearer'
         ], 201);
@@ -35,7 +35,7 @@ class UserController extends Controller
 
     public function login(Request $request){
 
-        $data = $request->validator([
+        $data = $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string|min:8'
         ]);
@@ -54,6 +54,7 @@ class UserController extends Controller
                 'status' => 200, 
                 'message' => "$user->name berhasil login",
                 'token' => $token,
+                'user' => $user,
                 'token_type' => 'Bearer',
             ], 200);
         }
