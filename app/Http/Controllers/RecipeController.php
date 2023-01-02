@@ -34,14 +34,16 @@ class RecipeController extends Controller
             'title' => 'required|string|max:255',
             'benefit' => 'required|string|max:255',
             'tools_and_materials' => 'required|string',
-            'steps' => 'required|string'
+            'steps' => 'required|string',
+            'imageUrl' => 'required|string'
         ]);
 
         $recipe = Recipe::create([
             'title' => $data['title'],
             'benefit' => $data['benefit'],
             'tools_and_materials' => $data['tools_and_materials'],
-            'steps' => $data['steps']
+            'steps' => $data['steps'],
+            'imageUrl' => $data['imageUrl']
         ]);
         return response()->json([
             'status' => 201,
@@ -96,7 +98,8 @@ class RecipeController extends Controller
                 'title' => $request->title ? $request->title : $recipe->title,
                 'benefit' => $request->benefit ? $request->benefit : $recipe->benefit,
                 'tools_and_materials' => $request->tools_and_materials ? $request->tools_and_materials : $recipe->tools_and_materials,
-                'steps' => $request->steps ? $request->steps : $recipe->steps 
+                'steps' => $request->steps ? $request->steps : $recipe->steps ,
+                'imageUrl' => $request->imageUrl ? $request->imageUrl : $recipe->imageUrl
             ]);
             return response()->json([
                 'status' => 200,
