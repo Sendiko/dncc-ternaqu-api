@@ -13,5 +13,6 @@ class Recipe extends Model
         'benefit',
         'tools_and_materials',
         'steps',
+        'imageUrl'
     ];
 }
