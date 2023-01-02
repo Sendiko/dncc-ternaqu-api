@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
+use App\Models\Store;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -13,7 +15,12 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        $product = Product::all();
+        return response()->json([
+            'status' => 200,
+            'message' => 'data successfully retrieved',
+            'stores' => $product
+        ], 200);
     }
 
     /**
@@ -24,7 +31,29 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'requried|string',
+            'benefits' => 'required|string',
+            'price' => 'required|integer',
+            'brand' => 'required|string|max:255',
+            'store_id' => 'required|integer',
+        ]);
+
+        $store = Store::find($data['store_id']);
+        $product = Product::create([
+            'title' => $data['title'],
+            'description' => $data['description'],
+            'benefits' => $data['benefits'],
+            'store_id' => $store->store_id,
+            'product_id' => uniqid()
+        ]);
+
+        return response()->json([
+            'status' => 201,
+            'message' => 'data successfully sent',
+            'product' => $product
+        ], 201);
     }
 
     /**
@@ -35,7 +64,20 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        //
+        $product = Product::find($id);
+        if($product){
+            return response()->json([
+                'status' => 200,
+                'message' => 'data successfully retrieved',
+                'recipe' => $product
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 404,
+                'message' => "product id $id not found",
+                'recipe' => 'null'
+            ], 404);
+        }
     }
 
     /**
@@ -47,7 +89,38 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $product = Product::find($id);
+
+        $data = $request->validate([
+            'title' => 'string|max:255',
+            'description' => 'string',
+            'benefits' => 'string',
+            'price' => 'integer',
+            'brand' => 'string|max:255',
+            'store_id' => 'integer',
+        ]);
+        
+        if($product){
+            $product->update([
+                'title' => $request->title ? $request->title : $product->title,
+                'description' => $request->description ? $request->description : $product->description,
+                'benefits' => $request->benefits ? $request->benefits : $product->benefits,
+                'price' => $request->price ? $request->price : $product->price,
+                'store_id' => $request->store_id ? $request->store_id : $product->store_id,  
+            ]);
+            return response()->json([
+                'status' => 200,
+                'message' => 'data successfully updated',
+                'product' => $product
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 404,
+                'message' => "product with id $id not found",
+                'product' => 'null'
+            ], 404);
+        }
+
     }
 
     /**
@@ -58,6 +131,20 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $product = Product::find($id);
+        if($product){
+            $product->delete();
+            return response()->json([
+                'status' => 200,
+                'message' => 'data successfully deleted',
+                'product' => $product
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 404,
+                'message' => "product with id $id not found",
+                'product' => 'null'
+            ], 404); 
+        }
     }
 }

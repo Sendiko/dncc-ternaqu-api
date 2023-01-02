@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\UserController;
@@ -29,6 +30,9 @@ Route::get('recipe/{id}', [RecipeController::class, 'show']);
 Route::get('store', [StoreController::class, 'index']);
 Route::get('store/{id}', [StoreController::class, 'show']);
 
+Route::get('product', [ProductController::class, 'index']);
+Route::get('product/{id}', [ProductController::class, 'show']);
+
 //!! PRIVATE ROUTE
 Route::middleware('auth:sanctum')->group(function(){
     Route::post('logout', [UserController::class, 'logout']);
@@ -36,6 +40,9 @@ Route::middleware('auth:sanctum')->group(function(){
         'index', 'show'
     ]);
     Route::resource('store', StoreController::class)->except([
+        'index', 'show'
+    ]);
+    Route::resource('product', ProductController::class)->except([
         'index', 'show'
     ]);
 });
