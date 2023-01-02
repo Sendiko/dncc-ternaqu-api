@@ -106,7 +106,7 @@ class StoreController extends Controller
             return response()->json([
                 'status' => 404,
                 'message' => "store with id $id not found",
-                'stores' => $store
+                'stores' => 'null'
             ], 404);            
         }
     }
@@ -131,7 +131,7 @@ class StoreController extends Controller
             return response()->json([
                 'status' => 404,
                 'message' => "store with id $id not found",
-                'stores' => $store
+                'stores' => 'null'
             ], 404); 
         }
     }
