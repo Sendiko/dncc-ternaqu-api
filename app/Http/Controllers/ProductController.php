@@ -33,22 +33,23 @@ class ProductController extends Controller
     {
         $data = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'requried|string',
+            'description' => 'required|string',
             'benefits' => 'required|string',
             'price' => 'required|integer',
             'brand' => 'required|string|max:255',
             'store_id' => 'required|integer',
         ]);
 
-        $store = Store::find($data['store_id']);
         $product = Product::create([
             'title' => $data['title'],
             'description' => $data['description'],
             'benefits' => $data['benefits'],
-            'store_id' => $store->store_id,
+            'price' => $data['price'],
+            'brand' => $data['brand'],
+            'store_id' => $data['store_id'],
             'product_id' => uniqid()
         ]);
-
+        
         return response()->json([
             'status' => 201,
             'message' => 'data successfully sent',
@@ -104,8 +105,9 @@ class ProductController extends Controller
             $product->update([
                 'title' => $request->title ? $request->title : $product->title,
                 'description' => $request->description ? $request->description : $product->description,
-                'benefits' => $request->benefits ? $request->benefits : $product->benefits,
-                'price' => $request->price ? $request->price : $product->price,
+                'benefits' => $request->benefits ? $request->benefits : $product->benefits, 
+                'price' => $request->price ? $request->price : $product->price, 
+                'brand' => $request->brand ? $request->brand : $product->brand,
                 'store_id' => $request->store_id ? $request->store_id : $product->store_id,  
             ]);
             return response()->json([
