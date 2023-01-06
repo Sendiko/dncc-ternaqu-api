@@ -19,7 +19,7 @@ class ProductController extends Controller
         return response()->json([
             'status' => 200,
             'message' => 'data successfully retrieved',
-            'stores' => $product
+            'product' => $product
         ], 200);
     }
 
@@ -37,6 +37,7 @@ class ProductController extends Controller
             'benefits' => 'required|string',
             'price' => 'required|integer',
             'brand' => 'required|string|max:255',
+            'imageUrl' => 'required|string',
             'store_id' => 'required|integer',
         ]);
 
@@ -46,6 +47,7 @@ class ProductController extends Controller
             'benefits' => $data['benefits'],
             'price' => $data['price'],
             'brand' => $data['brand'],
+            'imageUrl' => $data['imageUrl'],
             'store_id' => $data['store_id'],
             'product_id' => uniqid()
         ]);
@@ -98,6 +100,7 @@ class ProductController extends Controller
             'benefits' => 'string',
             'price' => 'integer',
             'brand' => 'string|max:255',
+            'imageUrl' => 'required|string',
             'store_id' => 'integer',
         ]);
         
@@ -107,7 +110,8 @@ class ProductController extends Controller
                 'description' => $request->description ? $request->description : $product->description,
                 'benefits' => $request->benefits ? $request->benefits : $product->benefits, 
                 'price' => $request->price ? $request->price : $product->price, 
-                'brand' => $request->brand ? $request->brand : $product->brand,
+                'brand' => $request->brand ? $request->brand : $product->brand, 
+                'imageUrl' => $request->imageUrl ? $request->imageUrl : $product->imageUrl,
                 'store_id' => $request->store_id ? $request->store_id : $product->store_id,  
             ]);
             return response()->json([

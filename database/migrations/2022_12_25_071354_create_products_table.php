@@ -22,6 +22,7 @@ class CreateProductsTable extends Migration
             $table->integer('price');
             $table->bigInteger('store_id');
             $table->string('product_id');
+            $table->string('imageUrl');
             $table->timestamps();
         });
     }
