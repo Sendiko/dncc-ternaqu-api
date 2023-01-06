@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\TopicController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +34,9 @@ Route::get('store/{id}', [StoreController::class, 'show']);
 Route::get('product', [ProductController::class, 'index']);
 Route::get('product/{id}', [ProductController::class, 'show']);
 
+Route::get('topics', [TopicController::class, 'index']);
+Route::get('topics/{id}', [TopicController::class, 'show']);
+
 //!! PRIVATE ROUTE
 Route::middleware('auth:sanctum')->group(function(){
     Route::post('logout', [UserController::class, 'logout']);
@@ -43,6 +47,9 @@ Route::middleware('auth:sanctum')->group(function(){
         'index', 'show'
     ]);
     Route::resource('product', ProductController::class)->except([
+        'index', 'show'
+    ]);
+    Route::resource('topics', TopicController::class)->except([
         'index', 'show'
     ]);
 });
