@@ -44,8 +44,7 @@ class TopicController extends Controller
             'user_id' => 'required|integer',
             'title' => 'string|max:255',
             'question' => 'required|string',
-            'replyTo' => 'integer',
-            'profileUrl' => 'required|string'
+            'replyTo' => 'integer'
         ]);
 
         $user = User::find($data['user_id']);
@@ -56,7 +55,7 @@ class TopicController extends Controller
                 'title' => $data['title'],
                 'question' => $data['question'],
                 'replyTo' => $data['replyTo'],
-                'profileUrl' => $data['profileUrl']
+                'profileUrl' => $user->profileUrl
             ]);
             return response()->json([
                 'status' => 201,
@@ -84,7 +83,7 @@ class TopicController extends Controller
         $topic = Topic::find($id);
         if($topic){
             $replyTo = $topic->id;
-            $replies = Topic::where('replyTo', $replyTo);
+            $replies = DB::select("select * from topics where replyTo = $replyTo");
             return response()->json([
                 'status' => 200,
                 'message' => 'data successfully retrieved',
