@@ -69,10 +69,12 @@ class ProductController extends Controller
     {
         $product = Product::find($id);
         if($product){
+            $store = Store::find($product->store_id);
             return response()->json([
                 'status' => 200,
                 'message' => 'data successfully retrieved',
-                'recipe' => $product
+                'recipe' => $product,
+                'store' => $store
             ], 200);
         } else {
             return response()->json([
