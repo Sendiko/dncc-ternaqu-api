@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Recipe;
-use Illuminate\Http\Request;
+use App\Http\Requests\RecipeStoreRequest;
+use App\Http\Requests\RecipeUpdateRequest;
 
 class RecipeController extends Controller
 {
@@ -14,43 +15,32 @@ class RecipeController extends Controller
      */
     public function index()
     {
-        $recipe = Recipe::all();
+        $recipes = Recipe::get(); // get all data from recipes table
+
         return response()->json([
             'status' => 200,
             'message' => 'data successfully retrieved',
-            'recipe' => $recipe
-        ], 200);
+            'recipe' => $recipes
+        ], 200); // return data with status code 200
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\RecipeStoreRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(RecipeStoreRequest $request)
     {
-        $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'benefit' => 'required|string|max:255',
-            'tools_and_materials' => 'required|string',
-            'steps' => 'required|string',
-            'imageUrl' => 'required|string'
-        ]);
+        $data = $request->validated(); // validate data from request
 
-        $recipe = Recipe::create([
-            'title' => $data['title'],
-            'benefit' => $data['benefit'],
-            'tools_and_materials' => $data['tools_and_materials'],
-            'steps' => $data['steps'],
-            'imageUrl' => $data['imageUrl']
-        ]);
+        $recipe = Recipe::create($data); // create new data in recipes table
+
         return response()->json([
             'status' => 201,
             'message' => 'data successfully sent',
             'recipe' => $recipe
-        ], 201);
-
+        ], 201); // return data with status code 201
     }
 
     /**
@@ -59,60 +49,53 @@ class RecipeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(int $id)
     {
-        $recipe = Recipe::find($id);
-        if($recipe){
-            return response()->json([
-                'status' => 200,
-                'message' => 'data successfully retrieved',
-                'recipe' => $recipe
-            ], 200);
-        } else {
+        $recipe = Recipe::find($id); // find data by id
+
+        if (!$recipe) { // if data not found
             return response()->json([
                 'status' => 404,
-                'message' => "recipe id $id not found",
+                'message' => "recipe id " . $id . " not found",
                 'recipe' => 'null'
-            ], 404);
+            ], 404); // return data with status code 404
         }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'data successfully retrieved',
+            'recipe' => $recipe
+        ], 200); // return data with status code 200
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\RecipeUpdateRequest  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(RecipeUpdateRequest $request, int $id)
     {
-        $recipe = Recipe::find($id);
-        $data = $request->validate([
-            'title' => 'string|max:255',
-            'benefit' => 'string|max:255',
-            'tools_and_materials' => 'string',
-            'steps' => 'string'
-        ]);
-        if($recipe){
-            $recipe->update([
-                'title' => $request->title ? $request->title : $recipe->title,
-                'benefit' => $request->benefit ? $request->benefit : $recipe->benefit,
-                'tools_and_materials' => $request->tools_and_materials ? $request->tools_and_materials : $recipe->tools_and_materials,
-                'steps' => $request->steps ? $request->steps : $recipe->steps ,
-                'imageUrl' => $request->imageUrl ? $request->imageUrl : $recipe->imageUrl
-            ]);
-            return response()->json([
-                'status' => 200,
-                'message' => 'data successfully updated',
-                'recipe' => $recipe
-            ], 200);
-        } else {
+        $data = $request->validated(); // validate data from request
+
+        $recipe = Recipe::find($id); // find data by id
+
+        if (!$recipe) { // if data not found
             return response()->json([
                 'status' => 404,
                 'message' => "recipe with id $id not found",
                 'recipe' => 'null'
-            ], 404);
+            ], 404); // return data with status code 404
         }
+
+        $recipe->update($data); // update data in recipes table
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'data successfully updated',
+            'recipe' => $recipe
+        ], 200); // return data with status code 200
     }
 
     /**
@@ -121,22 +104,24 @@ class RecipeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
-        $recipe = Recipe::find($id);
-        if($recipe){
-            $recipe->delete();
-            return response()->json([
-                'status' => 200,
-                'message' => 'data successfully deleted',
-                'recipe' => $recipe
-            ], 200); 
-        } else {
+        $recipe = Recipe::find($id); // find data by id
+
+        if (!$recipe) { // if data not found
             return response()->json([
                 'status' => 404,
                 'message' => "recipe with id $id not found",
                 'recipe' => 'null'
-            ], 404);
+            ], 404); // return data with status code 404
         }
+
+        $recipe->delete(); // delete data in recipes table
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'data successfully deleted',
+            'recipe' => $recipe
+        ], 200); // return data with status code 200
     }
 }

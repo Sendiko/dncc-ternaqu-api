@@ -3,88 +3,102 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\Request;
+use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\RegisterRequest;
 
 class UserController extends Controller
 {
-    public function register(Request $request){
-        
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        return auth('sanctum')->user(); // return user data
+    }
 
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            'profileUrl' => $request->profileUrl
-        ]);
+    /**
+     * Add new user for access application.
+     *
+     * @param  \App\Http\Requests\RegisterRequest  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function register(RegisterRequest $request)
+    {
+        $data = $request->validated(); // validate data from request
+        $data['password'] = Hash::make($data['password']); // hash password
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $user = User::create($data); // create new data in users table
+
+        $token = $user->createToken('auth_token'); // create token for user
+
         return response()->json([
             'status' => 201,
-            'message' => "$user->name berhasil register",
+            'message' => $user->name . " berhasil register",
             'user' => $user,
-            'token' => $token,
+            'token' => $token->plainTextToken,
             'token_type' => 'Bearer'
-        ], 201);
-
+        ], 201); // return data with status code 201
     }
 
-    public function login(Request $request){
+    /**
+     * Validate user before access applicaiton.
+     *
+     * @param  \App\Http\Requests\LoginRequest  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function login(LoginRequest $request)
+    {
+        $data = $request->validated(); // validate data from request
 
-        $data = $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string|min:8'
-        ]);
+        $user = User::where('email', $data['email'])->first(); // find user by email
 
-        $user = User::where('email', $data['email'])->firstOrFail();
-        if(!$user || !Hash::check($data['password'], $user->password)){
+        if (!$user) { // if user not found
             return response()->json([
                 'status' => 401,
-                'message' => "$user->name gagal login, mohon cek kembali data",
+                'message' => 'akun tidak ditemukan, mohon cek kembali',
                 'token' => 'null',
                 'token_type' => 'null'
-            ], 401);
-        } else {
-            $token = $user->createToken('auth_token')->plainTextToken;
-            return response()->json([
-                'status' => 200, 
-                'message' => "$user->name berhasil login",
-                'token' => $token,
-                'user' => $user,
-                'token_type' => 'Bearer',
-            ], 200);
+            ], 401); // return data with status code 401
         }
 
-    }
+        if (!Hash::check($data['password'], $user->password)) { // if password not match
+            return response()->json([
+                'status' => 401,
+                'message' => $user->name . ' gagal login, mohon cek kembali',
+                'token' => 'null',
+                'token_type' => 'null'
+            ], 401); // return data with status code 401
+        }
 
-    public function logout(){
-        auth('sanctum')->user()->tokens()->delete();
+        $token = $user->createToken('auth_token'); // create token for user
+
         return response()->json([
             'status' => 200,
-            'message' => 'berhasil logout',
+            'message' => $user->name . ' berhasil login',
+            'user' => $user,
+            'token' => $token->plainTextToken,
+            'token_type' => 'Bearer',
+        ], 200); // return data with status code 200
+    }
+
+    /**
+     * Remove access from authenticated user.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function logout()
+    {
+        $user = auth('sanctum')->user(); // get user data
+        $user->tokens()->delete(); // delete user token
+
+        return response()->json([
+            'status' => 200,
+            'message' => $user->name . ' berhasil logout',
             'token' => 'null',
             'token_type' => 'null'
-        ]);
+        ]); // return data with status code 200
     }
-
-    public function upgradeToPremium($id){
-        $user = User::find($id);
-
-        $user->update([
-            "premium" => "1"
-        ]);
-
-        return response()->json([
-            'status' => 200,
-            'message' => "Selamat datang di premium, $user->name!!",
-            'info' => $user
-        ], 200);
-
-    }
-
 }

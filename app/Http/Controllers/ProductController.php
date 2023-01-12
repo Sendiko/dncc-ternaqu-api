@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\Store;
-use Illuminate\Http\Request;
+use App\Http\Requests\ProductStoreRequest;
+use App\Http\Requests\ProductUpdateRequest;
 
 class ProductController extends Controller
 {
@@ -15,48 +15,33 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $product = Product::all();
+        $products = Product::get(); // get all data from products table
+
         return response()->json([
             'status' => 200,
             'message' => 'data successfully retrieved',
-            'product' => $product
-        ], 200);
+            'product' => $products
+        ], 200); // return data with status code 200
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\ProductStoreRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ProductStoreRequest $request)
     {
-        $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'benefits' => 'required|string',
-            'price' => 'required|integer',
-            'brand' => 'required|string|max:255',
-            'imageUrl' => 'required|string',
-            'store_id' => 'required|integer',
-        ]);
+        $data = $request->validated(); // validate data from request
+        $data['product_id'] = uniqid(); // generate unique id
 
-        $product = Product::create([
-            'title' => $data['title'],
-            'description' => $data['description'],
-            'benefits' => $data['benefits'],
-            'price' => $data['price'],
-            'brand' => $data['brand'],
-            'imageUrl' => $data['imageUrl'],
-            'store_id' => $data['store_id'],
-            'product_id' => uniqid()
-        ]);
-        
+        $product = Product::create($data); // create new data in products table
+
         return response()->json([
             'status' => 201,
             'message' => 'data successfully sent',
             'product' => $product
-        ], 201);
+        ], 201); // return data with status code 201
     }
 
     /**
@@ -65,70 +50,54 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(int $id)
     {
-        $product = Product::find($id);
-        if($product){
-            $store = Store::find($product->store_id);
-            return response()->json([
-                'status' => 200,
-                'message' => 'data successfully retrieved',
-                'recipe' => $product,
-                'store' => $store
-            ], 200);
-        } else {
+        $product = Product::with('store')->find($id); // find data by id
+
+        if (!$product) { // if data not found
             return response()->json([
                 'status' => 404,
-                'message' => "product id $id not found",
-                'recipe' => 'null'
-            ], 404);
+                'message' => "product id " . $id . " not found",
+                'product' => 'null'
+            ], 404); // return data with status code 404
         }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'data successfully retrieved',
+            'product' => $product,
+            'store' => $product->store
+        ], 200); // return data with status code 200
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\ProductUpdateRequest  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(ProductUpdateRequest $request, int $id)
     {
-        $product = Product::find($id);
+        $data = $request->validated(); // validate data from request
 
-        $data = $request->validate([
-            'title' => 'string|max:255',
-            'description' => 'string',
-            'benefits' => 'string',
-            'price' => 'integer',
-            'brand' => 'string|max:255',
-            'imageUrl' => 'required|string',
-            'store_id' => 'integer',
-        ]);
-        
-        if($product){
-            $product->update([
-                'title' => $request->title ? $request->title : $product->title,
-                'description' => $request->description ? $request->description : $product->description,
-                'benefits' => $request->benefits ? $request->benefits : $product->benefits, 
-                'price' => $request->price ? $request->price : $product->price, 
-                'brand' => $request->brand ? $request->brand : $product->brand, 
-                'imageUrl' => $request->imageUrl ? $request->imageUrl : $product->imageUrl,
-                'store_id' => $request->store_id ? $request->store_id : $product->store_id,  
-            ]);
-            return response()->json([
-                'status' => 200,
-                'message' => 'data successfully updated',
-                'product' => $product
-            ], 200);
-        } else {
+        $product = Product::find($id); // find data by id
+
+        if (!$product) { // if data not found
             return response()->json([
                 'status' => 404,
                 'message' => "product with id $id not found",
                 'product' => 'null'
-            ], 404);
+            ], 404); // return data with status code 404
         }
 
+        $product->update($data); // update data in products table
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'data successfully updated',
+            'product' => $product
+        ], 200); // return data with status code 200
     }
 
     /**
@@ -137,22 +106,24 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
-        $product = Product::find($id);
-        if($product){
-            $product->delete();
-            return response()->json([
-                'status' => 200,
-                'message' => 'data successfully deleted',
-                'product' => $product
-            ], 200);
-        } else {
+        $product = Product::find($id); // find data by id
+
+        if (!$product) { // if data not found
             return response()->json([
                 'status' => 404,
                 'message' => "product with id $id not found",
                 'product' => 'null'
-            ], 404); 
+            ], 404); // return data with status code 404
         }
+
+        $product->delete(); // delete data in products table
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'data successfully deleted',
+            'product' => $product
+        ], 200); // return data with status code 200
     }
 }
