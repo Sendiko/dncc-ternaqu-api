@@ -14,7 +14,7 @@ class RegisterRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return true; // check if user is authenticated
     }
 
     /**
@@ -29,7 +29,7 @@ class RegisterRequest extends FormRequest
             'email' => ['required', 'string', 'email:dns', 'max:255', 'unique:users,email'],
             'profileUrl' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
             'password' => ['required', 'string', 'min:8', 'max:255', 'confirmed']
-        ];
+        ]; // validation rules
     }
 
     /**
@@ -43,9 +43,9 @@ class RegisterRequest extends FormRequest
             'status' => 401,
             'message' => 'Unauthorized Access',
             'error' => 'You dont have right access'
-        ], 201);
+        ], 201); // custom response
 
-        abort($response);
+        abort($response); // abort with custom response
     }
 
     /**
@@ -56,14 +56,14 @@ class RegisterRequest extends FormRequest
      */
     public function failedValidation(Validator $validator)
     {
-        $errors = $validator->errors();
+        $errors = $validator->errors(); // get errors
 
         $response = response()->json([
             'status' => 422,
             'message' => 'Server Error',
-            'error' => $errors->messages()
-        ], 201);
+            'error' => $errors->messages() // get error messages
+        ], 201); // custom response
 
-        abort($response);
+        abort($response); // abort with custom response
     }
 }
