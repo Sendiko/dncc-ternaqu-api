@@ -14,7 +14,7 @@ class RecipeStoreRequest extends FormRequest
      */
     public function authorize()
     {
-        return auth('sanctum')->check();
+        return auth('sanctum')->check(); // check if user is authenticated
     }
 
     /**
@@ -25,12 +25,12 @@ class RecipeStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'title' => ['nullable', 'string', 'max:255', 'unique:recipes,title'],
-            'benefit' => ['nullable', 'string', 'max:255'],
-            'tools_and_materials' => ['nullable', 'string', 'max:255'],
-            'steps' => ['nullable', 'string', 'max:255'],
+            'title' => ['required', 'string', 'max:255', 'unique:recipes,title'],
+            'benefit' => ['required', 'string', 'max:255'],
+            'tools_and_materials' => ['required', 'string', 'max:255'],
+            'steps' => ['required', 'string', 'max:255'],
             'imageUrl' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048']
-        ];
+        ]; // validation rules
     }
 
     /**
@@ -44,9 +44,9 @@ class RecipeStoreRequest extends FormRequest
             'status' => 401,
             'message' => 'Unauthorized Access',
             'error' => 'You dont have right access'
-        ], 201);
+        ], 201); // custom response
 
-        abort($response);
+        abort($response); // abort with custom response
     }
 
     /**
@@ -57,14 +57,14 @@ class RecipeStoreRequest extends FormRequest
      */
     public function failedValidation(Validator $validator)
     {
-        $errors = $validator->errors();
+        $errors = $validator->errors(); // get errors
 
         $response = response()->json([
             'status' => 422,
             'message' => 'Server Error',
-            'error' => $errors->messages()
-        ], 201);
+            'error' => $errors->messages() // get error messages
+        ], 201); // custom response
 
-        abort($response);
+        abort($response); // abort with custom response
     }
 }

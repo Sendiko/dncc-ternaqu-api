@@ -14,7 +14,7 @@ class LoginRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return true; // check if user is authenticated
     }
 
     /**
@@ -27,7 +27,7 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email:dns', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'max:255']
-        ];
+        ]; // validation rules
     }
 
     /**
@@ -41,9 +41,9 @@ class LoginRequest extends FormRequest
             'status' => 401,
             'message' => 'Unauthorized Access',
             'error' => 'You dont have right access'
-        ], 201);
+        ], 201); // custom response
 
-        abort($response);
+        abort($response); // abort with custom response
     }
 
     /**
@@ -54,14 +54,14 @@ class LoginRequest extends FormRequest
      */
     public function failedValidation(Validator $validator)
     {
-        $errors = $validator->errors();
+        $errors = $validator->errors(); // get errors
 
         $response = response()->json([
             'status' => 422,
             'message' => 'Server Error',
-            'error' => $errors->messages()
-        ], 201);
+            'error' => $errors->messages() // get error messages
+        ], 201); // custom response
 
-        abort($response);
+        abort($response); // abort with custom response
     }
 }

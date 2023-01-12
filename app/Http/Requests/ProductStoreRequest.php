@@ -14,7 +14,7 @@ class ProductStoreRequest extends FormRequest
      */
     public function authorize()
     {
-        return auth('sanctum')->check();
+        return auth('sanctum')->check(); // check if user is authenticated
     }
 
     /**
@@ -32,7 +32,7 @@ class ProductStoreRequest extends FormRequest
             'brand' => ['required', 'string', 'max:255'],
             'store_id' => ['required', 'numeric', 'min:1'],
             'imageUrl' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048']
-        ];
+        ]; // validation rules
     }
 
     /**
@@ -46,9 +46,9 @@ class ProductStoreRequest extends FormRequest
             'status' => 401,
             'message' => 'Unauthorized Access',
             'error' => 'You dont have right access'
-        ], 201);
+        ], 201); // custom response
 
-        abort($response);
+        abort($response); // abort with custom response
     }
 
     /**
@@ -59,14 +59,14 @@ class ProductStoreRequest extends FormRequest
      */
     public function failedValidation(Validator $validator)
     {
-        $errors = $validator->errors();
+        $errors = $validator->errors(); // get errors
 
         $response = response()->json([
             'status' => 422,
             'message' => 'Server Error',
-            'error' => $errors->messages()
-        ], 201);
+            'error' => $errors->messages() // get error messages
+        ], 201); // custom response
 
-        abort($response);
+        abort($response); // abort with custom response
     }
 }
