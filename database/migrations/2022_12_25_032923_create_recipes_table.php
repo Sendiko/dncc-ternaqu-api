@@ -18,7 +18,7 @@ class CreateRecipesTable extends Migration
             $table->string('title');
             $table->string('benefit');
             $table->string('tools_and_materials');
-            $table->string('steps');
+            $table->text('steps');
             $table->string('imageUrl');
             $table->timestamps();
         });
