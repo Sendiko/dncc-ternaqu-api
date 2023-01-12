@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Topic;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Models\Topic;
+use App\Http\Requests\TopicStoreRequest;
+use App\Http\Requests\TopicUpdateRequest;
 
 class TopicController extends Controller
 {
@@ -16,60 +16,56 @@ class TopicController extends Controller
      */
     public function index()
     {
-        $topics = DB::select('select * from topics where replyTo = 0');
-        if($topics){
-            return response()->json([
-                'status' => 200,
-                'message' => 'data successfully retrieved',
-                'topics' => $topics
-            ], 200);
-        } else {
+        $topics = Topic::where('replyTo', 0)->get(); // get all data from topics table
+        $topics->toArray(); // convert to array
+
+        if (!$topics) { // if data not found
             return response()->json([
                 'status' => 404,
                 'message' => 'there is no topic',
                 'topics' => 'null'
-            ], 404);
+            ], 404); // return data with status code 404
         }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'data successfully retrieved',
+            'topics' => $topics
+        ], 200); // return data with status code 200
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\TopicStoreRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(TopicStoreRequest $request)
     {
-        $data = $request->validate([
-            'user_id' => 'required|integer',
-            'title' => 'string|max:255',
-            'question' => 'required|string',
-            'replyTo' => 'integer'
-        ]);
+        $data = $request->validated(); // validate data from request
 
-        $user = User::find($data['user_id']);
+        $user = User::find($data['user_id']); // find user by id
 
-        if($user){
-            $topic = Topic::create([
-                'name' => $user->name,
-                'title' => $data['title'],
-                'question' => $data['question'],
-                'replyTo' => $data['replyTo'],
-                'profileUrl' => $user->profileUrl
-            ]);
-            return response()->json([
-                'status' => 201,
-                'message' => 'data successfully sent',
-                'topic' => $topic,
-            ], 201);
-        } else {
+        if (!$user) { // if user not found
             return response()->json([
                 'status' => 404,
-                'message' => "user with id $user->id not found",
+                'message' => "user with id " . $user->id . " not found",
                 'topic' => 'null'
-            ], 404);
+            ], 404); // return data with status code 404
         }
 
+        unset($data['user_id']); // remove user_id from data
+
+        $data['name'] = $user->name; // add name to data
+        $data['profileUrl'] = $user->profileUrl; // add profileUrl to data
+
+        $topic = Topic::create($data); // create new data in topics table
+
+        return response()->json([
+            'status' => 201,
+            'message' => 'data successfully sent',
+            'topic' => $topic,
+        ], 201); // return data with status code 201
     }
 
     /**
@@ -78,63 +74,66 @@ class TopicController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(int $id)
     {
-        $topic = Topic::find($id);
-        if($topic){
-            $replyTo = $topic->id;
-            $replies = DB::select("select * from topics where replyTo = $replyTo");
-            return response()->json([
-                'status' => 200,
-                'message' => 'data successfully retrieved',
-                'topic' => $topic,
-                'replies' => $replies
-            ], 200);
-        } else {
+        $topic = Topic::find($id); // find data by id
+
+        if (!$topic) { // if data not found
             return response()->json([
                 'status' => 404,
-                'message' => "topic with id $id not found",
+                'message' => "topic with id " . $id . " not found",
                 'topic' => 'null',
                 'replies' => 'null'
-            ], 404);       
+            ], 404); // return data with status code 404
         }
+
+        $replies = Topic::where('replyTo', $topic->id)->get(); // get all replies from topics table
+        $replies->toArray(); // convert to array
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'data successfully retrieved',
+            'topic' => $topic,
+            'replies' => $replies
+        ], 200); // return data with status code 200
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\TopicUpdateRequest  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(TopicUpdateRequest $request, int $id)
     {
-        $topic = Topic::find($id);
-        if($topic){
-            if($topic->replyTo == 0){
-                return response()->json([
-                    'status' => 403,
-                    'message' => "You're not allowed to edit this topic"
-                ]);
-            } else {
-                $topic->update([
-                    'title' => $request->title ? $request->title : $topic->title,
-                    'question' => $request->question ? $request->question : $topic->question,
-                ]);
-                return response()->json([
-                    'status' => 200,
-                    'message' => 'data successfully updated',
-                    'topic' => $topic
-                ]);
-            }
-        } else {
+        $data = $request->validated(); // validate data from request
+
+        $topic = Topic::find($id); // find data by id
+
+        if (!$topic) { // if data not found
             return response()->json([
                 'status' => 404,
-                'message' => "topic with id $id not found",
+                'message' => "topic with id " . $id . " not found",
                 'topic' => 'null',
                 'replies' => 'null'
-            ], 404);     
+            ], 404); // return data with status code 404
         }
+
+        if ($topic->replyTo == 0) { // if data is not a reply
+            return response()->json([
+                'status' => 403,
+                'message' => "You're not allowed to edit this topic"
+            ]); // return data with status code 403
+        }
+
+        $topic->update($data); // update data in topics table
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'data successfully updated',
+            'topic' => $topic
+        ]); // return data with status code 200
     }
 
     /**
@@ -143,24 +142,25 @@ class TopicController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
-        $topic = Topic::find($id);
-        if($topic){
-            $topic->delete();
+        $topic = Topic::find($id); // find data by id
 
-            return response()->json([
-                'status' => 200,
-                'message' => 'data successfully deleted',
-                'topic' => 'null'
-            ], 200);
-        } else {
+        if (!$topic) { // if data not found
             return response()->json([
                 'status' => 404,
-                'message' => "topic with id $id not found",
+                'message' => "topic with id " . $id . " not found",
                 'topic' => 'null',
                 'replies' => 'null'
-            ], 404);     
+            ], 404); // return data with status code 404
         }
+
+        $topic->delete(); // delete data from topics table
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'data successfully deleted',
+            'topic' => 'null'
+        ], 200); // return data with status code 200
     }
 }

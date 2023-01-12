@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Store;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreStoreRequest;
+use App\Http\Requests\StoreUpdateRequest;
 
 class StoreController extends Controller
 {
@@ -14,41 +15,33 @@ class StoreController extends Controller
      */
     public function index()
     {
-        $store = Store::all();
+        $stores = Store::get(); // get all data from stores table
+
         return response()->json([
             'status' => 200,
             'message' => 'data successfully retrieved',
-            'stores' => $store
-        ], 200);
+            'stores' => $stores
+        ], 200); // return data with status code 200
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\StoreStoreRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreStoreRequest $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'address'=> 'required|string|max:255',
-            'description' => 'required|string'
-        ]);
+        $data = $request->validated(); // validate data from request
+        $data['store_id'] = uniqid(); // generate unique id
 
-        $store = Store::create([
-            'store_id' => uniqid(),
-            'name' => $data['name'],
-            'address' => $data['address'],
-            'description' => $data['description']
-        ]);
+        $store = Store::create($data); // create new data in stores table
 
         return response()->json([
-            'status' => 201, 
+            'status' => 201,
             'message' => 'data successfully sent',
             'store' => $store
-        ], 201);
-
+        ], 201); // return data with status code 201
     }
 
     /**
@@ -57,58 +50,53 @@ class StoreController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(int $id)
     {
-        $store = Store::find($id);
-        if($store){
-            return response()->json([
-                'status' => 200,
-                'message' => 'data successfully retrieved',
-                'stores' => $store
-            ], 200);
-        } else {
+        $store = Store::find($id); // find data by id
+
+        if (!$store) { // if data not found
             return response()->json([
                 'status' => 404,
-                'message' => "store with id $id not found",
+                'message' => "store with id " . $id . " not found",
                 'stores' => $store
-            ], 404);
+            ], 404); // return data with status code 404
         }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'data successfully retrieved',
+            'stores' => $store
+        ], 200); // return data with status code 200
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\StoreUpdateRequest  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StoreUpdateRequest $request, int $id)
     {
-        $data = $request->validate([
-            'name' => 'string|max:255',
-            'address'=> 'string|max:255',
-            'description' => 'string'
-        ]);
+        $data = $request->validated(); // validate data from request
 
-        $store = Store::find($id);
-        if($store){
-            $store->update([
-                'name' => $request->name ? $request->name : $store->name,
-                'address' => $request->address ? $request->address : $store->address,
-                'description' => $request->description ? $request->description : $store->description
-            ]);
-            return response()->json([
-                'status' => 200,
-                'message' =>'data successfully updated',
-                'store' => $store
-            ], 200);
-        } else {
+        $store = Store::find($id); // find data by id
+
+        if (!$store) { // if data not found
             return response()->json([
                 'status' => 404,
-                'message' => "store with id $id not found",
+                'message' => "store with id " . $id . " not found",
                 'stores' => 'null'
-            ], 404);            
+            ], 404); // return data with status code 404
         }
+
+        $store->update($data);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'data successfully updated',
+            'store' => $store
+        ], 200); // return data with status code 200
     }
 
     /**
@@ -117,22 +105,24 @@ class StoreController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
-        $store = Store::find($id);
-        if($store){
-            $store->delete();
-            return response()->json([
-                'status' => 200,
-                'message' =>'data successfully deleted',
-                'store' => $store
-            ], 200);
-        } else {
+        $store = Store::find($id); // find data by id
+
+        if (!$store) { // if data not found
             return response()->json([
                 'status' => 404,
                 'message' => "store with id $id not found",
                 'stores' => 'null'
-            ], 404); 
+            ], 404); // return data with status code 404
         }
+
+        $store->delete(); // delete data
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'data successfully deleted',
+            'store' => $store
+        ], 200); // return data with status code 200
     }
 }
