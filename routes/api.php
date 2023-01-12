@@ -40,6 +40,7 @@ Route::get('topics/{id}', [TopicController::class, 'show']);
 //!! PRIVATE ROUTE
 Route::middleware('auth:sanctum')->group(function(){
     Route::post('logout', [UserController::class, 'logout']);
+    Route::get('upgrade/{id}', [UserController::class, 'upgradeToPremium']);
     Route::resource('recipe', RecipeController::class)->except([
         'index', 'show'
     ]);

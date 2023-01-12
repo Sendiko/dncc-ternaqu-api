@@ -72,4 +72,19 @@ class UserController extends Controller
         ]);
     }
 
+    public function upgradeToPremium($id){
+        $user = User::find($id);
+
+        $user->update([
+            "premium" => "1"
+        ]);
+
+        return response()->json([
+            'status' => 200,
+            'message' => "Selamat datang di premium, $user->name!!",
+            'info' => $user
+        ], 200);
+
+    }
+
 }
