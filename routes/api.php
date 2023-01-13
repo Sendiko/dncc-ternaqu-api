@@ -29,6 +29,8 @@ Route::get('product/{id}', 'ProductController@show');
 Route::get('topics', 'TopicController@index');
 Route::get('topics/{id}', 'TopicController@show');
 
+Route::get('image/{path}', 'ImageController@show')->name('image.show')->where('path', '.*');
+
 //!! PRIVATE ROUTE
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('user', 'UserController@index');
