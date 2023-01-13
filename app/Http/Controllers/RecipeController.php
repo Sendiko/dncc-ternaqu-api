@@ -34,7 +34,15 @@ class RecipeController extends Controller
     {
         $data = $request->validated(); // validate data from request
 
+        if (array_key_exists('imageUrl', $data)) { // if imageUrl key exist in data
+            $data['imageUrl'] = $this->saveSingleFile('image', $data['imageUrl']); // save image and return image url
+        }
+
         $recipe = Recipe::create($data); // create new data in recipes table
+
+        if (array_key_exists('imageUrl', $data)) { // if imageUrl key exist in data
+            $recipe->imageUrl = route('image.show', $recipe->imageUrl); // add image url to data
+        }
 
         return response()->json([
             'status' => 201,
@@ -61,6 +69,10 @@ class RecipeController extends Controller
             ], 404); // return data with status code 404
         }
 
+        if (!empty($recipe->imageUrl)) { // if image url not empty
+            $recipe->imageUrl = route('image.show', $recipe->imageUrl); // add image url to data
+        }
+
         return response()->json([
             'status' => 200,
             'message' => 'data successfully retrieved',
@@ -84,12 +96,20 @@ class RecipeController extends Controller
         if (!$recipe) { // if data not found
             return response()->json([
                 'status' => 404,
-                'message' => "recipe with id $id not found",
+                'message' => "recipe with id " . $id . " not found",
                 'recipe' => 'null'
             ], 404); // return data with status code 404
         }
 
+        if (array_key_exists('imageUrl', $data)) { // if imageUrl key exist in data
+            $data['imageUrl'] = $this->updateSingleFile('image', $data['imageUrl'], $recipe->imageUrl); // update image and return image url
+        }
+
         $recipe->update($data); // update data in recipes table
+
+        if (array_key_exists('imageUrl', $data)) { // if imageUrl key exist in data
+            $recipe->imageUrl = route('image.show', $recipe->imageUrl); // add image url to data
+        }
 
         return response()->json([
             'status' => 200,
@@ -111,12 +131,20 @@ class RecipeController extends Controller
         if (!$recipe) { // if data not found
             return response()->json([
                 'status' => 404,
-                'message' => "recipe with id $id not found",
+                'message' => "recipe with id " . $id . " not found",
                 'recipe' => 'null'
             ], 404); // return data with status code 404
         }
 
+        if (!empty($recipe->imageUrl)) { // if image url not empty
+            $this->deleteFile('image', $recipe->imageUrl); // delete image
+        }
+
         $recipe->delete(); // delete data in recipes table
+
+        if (!empty($recipe->imageUrl)) { // if image url not empty
+            $recipe->imageUrl = route('image.show', $recipe->imageUrl); // add image url to data
+        }
 
         return response()->json([
             'status' => 200,

@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Traits\UploadFile;
 use App\Http\Requests\ProductStoreRequest;
 use App\Http\Requests\ProductUpdateRequest;
 
 class ProductController extends Controller
 {
+    use UploadFile; // use UploadFile trait
+
     /**
      * Display a listing of the resource.
      *
@@ -33,9 +36,18 @@ class ProductController extends Controller
     public function store(ProductStoreRequest $request)
     {
         $data = $request->validated(); // validate data from request
+
+        if (array_key_exists('imageUrl', $data)) { // if imageUrl key exist in data
+            $data['imageUrl'] = $this->saveSingleFile('image', $data['imageUrl']); // save image and return image url
+        }
+
         $data['product_id'] = uniqid(); // generate unique id
 
         $product = Product::create($data); // create new data in products table
+
+        if (array_key_exists('imageUrl', $data)) { // if imageUrl key exist in data
+            $product->imageUrl = route('image.show', $product->imageUrl); // add image url to data
+        }
 
         return response()->json([
             'status' => 201,
@@ -62,6 +74,10 @@ class ProductController extends Controller
             ], 404); // return data with status code 404
         }
 
+        if (!empty($product->imageUrl)) { // if image url not empty
+            $product->imageUrl = route('image.show', $product->imageUrl); // add image url to data
+        }
+
         return response()->json([
             'status' => 200,
             'message' => 'data successfully retrieved',
@@ -86,12 +102,20 @@ class ProductController extends Controller
         if (!$product) { // if data not found
             return response()->json([
                 'status' => 404,
-                'message' => "product with id $id not found",
+                'message' => "product with id " . $id . " not found",
                 'product' => 'null'
             ], 404); // return data with status code 404
         }
 
+        if (array_key_exists('imageUrl', $data)) { // if imageUrl key exist in data
+            $data['imageUrl'] = $this->updateSingleFile('image', $data['imageUrl'], $product->imageUrl); // update image and return image url
+        }
+
         $product->update($data); // update data in products table
+
+        if (array_key_exists('imageUrl', $data)) { // if imageUrl key exist in data
+            $product->imageUrl = route('image.show', $product->imageUrl); // add image url to data
+        }
 
         return response()->json([
             'status' => 200,
@@ -113,12 +137,20 @@ class ProductController extends Controller
         if (!$product) { // if data not found
             return response()->json([
                 'status' => 404,
-                'message' => "product with id $id not found",
+                'message' => "product with id " . $id . " not found",
                 'product' => 'null'
             ], 404); // return data with status code 404
         }
 
+        if (!empty($product->imageUrl)) { // if image url not empty
+            $this->deleteFile('image', $product->imageUrl); // delete image
+        }
+
         $product->delete(); // delete data in products table
+
+        if (!empty($product->imageUrl)) { // if image url not empty
+            $product->imageUrl = route('image.show', $product->imageUrl); // add image url to data
+        }
 
         return response()->json([
             'status' => 200,

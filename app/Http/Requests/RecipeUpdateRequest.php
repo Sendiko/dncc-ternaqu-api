@@ -24,8 +24,10 @@ class RecipeUpdateRequest extends FormRequest
      */
     public function rules()
     {
+        $id = basename(request()->path());
+
         return [
-            'title' => ['nullable', 'string', 'max:255', 'unique:recipes,title'],
+            'title' => ['nullable', 'string', 'max:255', 'unique:recipes,title,' . $id],
             'benefit' => ['nullable', 'string', 'max:255'],
             'tools_and_materials' => ['nullable', 'string', 'max:255'],
             'steps' => ['nullable', 'string', 'max:255'],
