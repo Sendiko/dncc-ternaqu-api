@@ -24,8 +24,10 @@ class TopicUpdateRequest extends FormRequest
      */
     public function rules()
     {
+        $id = basename(request()->path());
+
         return [
-            'title' => ['nullable', 'string', 'max:255'],
+            'title' => ['nullable', 'string', 'max:255', 'unique:topics,title,' . $id],
             'question' => ['nullable', 'string', 'max:255']
         ]; // validation rules
     }

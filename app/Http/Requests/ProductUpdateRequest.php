@@ -24,8 +24,10 @@ class ProductUpdateRequest extends FormRequest
      */
     public function rules()
     {
+        $id = basename(request()->path());
+
         return [
-            'title' => ['nullable', 'string', 'max:255', 'unique:products,title'],
+            'title' => ['nullable', 'string', 'max:255', 'unique:products,title,' . $id],
             'description' => ['nullable', 'string'],
             'benefits' => ['nullable', 'string', 'max:255'],
             'price' => ['nullable', 'numeric', 'min:1'],

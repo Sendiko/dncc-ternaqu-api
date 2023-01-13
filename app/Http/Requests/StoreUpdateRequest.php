@@ -24,8 +24,10 @@ class StoreUpdateRequest extends FormRequest
      */
     public function rules()
     {
+        $id = basename(request()->path());
+
         return [
-            'name' => ['nullable', 'string', 'max:255'],
+            'name' => ['nullable', 'string', 'max:255', 'unique:stores,name,' . $id],
             'address' => ['nullable', 'string'],
             'description' => ['nullable', 'string']
         ]; // validation rules
