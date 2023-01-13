@@ -112,7 +112,7 @@ class StoreController extends Controller
         if (!$store) { // if data not found
             return response()->json([
                 'status' => 404,
-                'message' => "store with id $id not found",
+                'message' => "store with id " . $id . " not found",
                 'stores' => 'null'
             ], 404); // return data with status code 404
         }
